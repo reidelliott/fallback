@@ -39,6 +39,9 @@ Here is a script that you can use to take database backups of domains on a Media
 # centosbkup.sh
 #!/bin/bash
 
+# Server codename. Uncomment the next line and update the value within ""
+server_code="LS9"
+
 # Set the directory where backups will be stored
 backup_dir="/path/to/backup/directory"
 

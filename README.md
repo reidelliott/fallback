@@ -45,6 +45,10 @@ backup_dir="/path/to/backup/directory"
 # Get a list of all domains on the server
 domains=`ls /var/www`
 
+# Create a log file in the backup directory
+log_file=$backup_dir/backup.log
+touch $log_file
+
 # Loop through each domain and create a backup of its database and theme and media uploads
 for domain in $domains
 do
@@ -57,15 +61,18 @@ do
     timestamp=$(date +%Y-%m-%d-%H-%M)
     
     # Create a backup of the database
-    mysqldump -u $db_user -p$db_pass $db_name > $backup_dir/$domain/$domain-$timestamp.sql
+    mysqldump -u $db_user -p$db_pass $db_name > $backup_dir/$domain/$domain-$timestamp.sql  || { echo "$(date +%Y-%m-%d-%H-%M) : Failed to backup $domain $db_name" >> $log_file; continue; }
+    echo "$(date +%Y-%m-%d-%H-%M) : Successfully backed up $domain $db_name" >> $log_file
     
     # Backup the active theme
     theme_path=`wp theme path --path=/var/www/$domain`
     active_theme=`wp theme get --field=stylesheet --path=$theme_path`
-    cp -r $theme_path/$active_theme $backup_dir/$domain/$domain-$timestamp
+    cp -r $theme_path/$active_theme $backup_dir/$domain/$domain-$timestamp  || { echo "$(date +%Y-%m-%d-%H-%M) : Failed to backup $domain $active_theme" >> $log_file; continue; }
+    echo "$(date +%Y-%m-%d-%H-%M) : Successfully backed up $domain $active_theme" >> $log_file
     
     # Backup the media uploads
-    cp -r /var/www/$domain/wp-content/uploads $backup_dir/$domain/$domain-$timestamp/
+    cp -r /var/www/$domain/wp-content/uploads $backup_dir/$domain/$domain-$timestamp/  || { echo "$(date +%Y-%m-%d-%H-%M) : Failed to backup $domain media uploads" >> $log_file; continue; }
+    echo "$(date +%Y-%m-%d-%H-%M) : Successfully backed up $domain media uploads" >> $log_file
     
 done
 ```

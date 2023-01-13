@@ -14,6 +14,10 @@ sudo mv wp-cli.phar /usr/local/bin/wp
 ## TODO
 * Add check to remove backups older than 30 days.
 * Integrate with Dropbox to offload backups from server.
+* Create and write to a log file in $backup_dir.
+* Skip over failed backups, log failure to log file.
+* Send an email with the backup results.
+* Check if the wp-cli.yml exists and use it to get the theme path, else go vanilla wp.
 
 ## Scheduling
 There might be various ways to schedule these backups, either in plesk or directly using contjob.

@@ -26,65 +26,13 @@ There might be various ways to schedule these backups, either in plesk or direct
 crontab -e
 
 # and add this line
-0 3 * * * /path/to/script.sh
+0 3 * * * /path/to/backup.sh
 
 # This will run the script every day at 3am.
-# Replace script.sh with the script you need, such as centosbkup.sh
 ```
 
-## CentOS7
-Here is a script that you can use to take database backups of domains on a Media Temple CentOS7 server. This includes a step to back up the active WordPress theme and the media uploads using `wp-cli`.
+## Linux Server Script Sample
+The file `backup.sh` here is your backup script sample.You can use it to take database backups of domains on a Linux server. This includes a step to back up the active WordPress theme and the media uploads using `wp-cli`. It should compress all of that into a file, then send an email with the results of the backup.  
 
-```sh
-# centosbkup.sh
-#!/bin/bash
+This script should work on Ubuntu as well as on CentOS, as long as the necessary dependencies are installed on the server. The script uses standard Linux commands such as `ls`, `grep`, `awk`, `mysqldump`, `wp`, `cp`, and `tar` to perform the backups. These commands are available on both Ubuntu and CentOS. However, the package names for the dependencies could be different between Ubuntu and CentOS. For example, wp-cli package is available in Ubuntu's default package manager apt, whereas on CentOS you will have to install it via other means such as downloading with the instructions above. In addition, the path to the webroot directory and the location of the WordPress configuration file might be different on Ubuntu compared to CentOS.  Make sure to verify the correct paths and dependencies before running the script on an Ubuntu server.
 
-# Server codename. Uncomment the next line and update the value within ""
-server_code="LS9"
-
-# Set the directory where backups will be stored
-backup_dir="/path/to/backup/directory"
-
-# Get a list of all domains on the server
-domains=`ls /var/www`
-
-# Create a log file in the backup directory
-log_file=$backup_dir/backup.log
-touch $log_file
-
-# Set an empty variable for results
-results=""
-
-# Loop through each domain and create a backup of its database and theme and media uploads
-for domain in $domains
-do
-    # Get the database name, username, and password for the domain
-    db_name=`grep "define('DB_NAME'" /var/www/$domain/wp-config.php | awk -F"'" '{print $4}'`
-    db_user=`grep "define('DB_USER'" /var/www/$domain/wp-config.php | awk -F"'" '{print $4}'`
-    db_pass=`grep "define('DB_PASSWORD'" /var/www/$domain/wp-config.php | awk -F"'" '{print $4}'`
-    
-    # Set the timestamp
-    timestamp=$(date +%Y-%m-%d-%H-%M)
-    
-    # Create a backup of the database
-    mysqldump -u $db_user -p$db_pass $db_name > $backup_dir/$domain/$domain-$timestamp.sql  || { echo "$(date +%Y-%m-%d-%H-%M) : Failed to backup $domain $db_name" >> $log_file; results+="$(date +%Y-%m-%d-%H-%M) : Failed to backup $domain $db_name\n"; continue; }
-    echo "$(date +%Y-%m-%d-%H-%M) : Successfully backed up $domain $db_name" >> $log_file
-    results+="$(date +%Y-%m-%d-%H-%M) : Successfully backed up $domain $db_name\n"
-    
-    # Backup the active theme
-    theme_path=`wp theme path --path=/var/www/$domain`
-    active_theme=`wp theme get --field=stylesheet --path=$theme_path`
-    cp -r $theme_path/$active_theme $backup_dir/$domain/$domain-$timestamp  || { echo "$(date +%Y-%m-%d-%H-%M) : Failed to backup $domain $active_theme" >> $log_file; results+="$(date +%Y-%m-%d-%H-%M) : Failed to backup $domain $active_theme\n";continue; }
-    echo "$(date +%Y-%m-%d-%H-%M) : Successfully backed up $domain $active_theme" >> $log_file
-    results+="$(date +%Y-%m-%d-%H-%M) : Successfully backed up $domain $active_theme\n"
-    
-    # Backup the media uploads
-    cp -r /var/www/$domain/wp-content/uploads $backup_dir/$domain/$domain-$timestamp/  || { echo "$(date +%Y-%m-%d-%H-%M) : Failed to backup $domain media uploads" >> $log_file; results+="$(date +%Y-%m-%d-%H-%M) : Failed to backup $domain media uploads\n"; continue; }
-    echo "$(date +%Y-%m-%d-%H-%M) : Successfully backed up $domain media uploads" >> $log_file
-    results+="$(date +%Y-%m-%d-%H-%M) : Successfully backed up $domain media uploads\n"
-
-done
-
-# Send the email with the summary of the results
-echo -e $results | mail -s "Backup report for all domains on \$server_code" $recipient
-```

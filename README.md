@@ -13,7 +13,7 @@ sudo mv wp-cli.phar /usr/local/bin/wp
 ```
 ## TODO
 * Add check to remove backups older than 30 days.
-* Integrate with Dropbox to offload backups from server.
+* Integrate with Google Drive to offload backups from server.
 * Create and write to a log file in $backup_dir.
 * Skip over failed backups, log failure to log file.
 * Send an email with the backup results.

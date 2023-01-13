@@ -45,17 +45,20 @@ do
     db_name=`grep "define('DB_NAME'" /var/www/$domain/wp-config.php | awk -F"'" '{print $4}'`
     db_user=`grep "define('DB_USER'" /var/www/$domain/wp-config.php | awk -F"'" '{print $4}'`
     db_pass=`grep "define('DB_PASSWORD'" /var/www/$domain/wp-config.php | awk -F"'" '{print $4}'`
-
+    
+    # Set the timestamp
+    timestamp=$(date +%Y-%m-%d-%H-%M)
+    
     # Create a backup of the database
-    mysqldump -u $db_user -p$db_pass $db_name > $backup_dir/$domain.sql
+    mysqldump -u $db_user -p$db_pass $db_name > $backup_dir/$domain/$domain-$timestamp.sql
     
     # Backup the active theme
     theme_path=`wp theme path --path=/var/www/$domain`
     active_theme=`wp theme get --field=stylesheet --path=$theme_path`
-    cp -r $theme_path/$active_theme $backup_dir/$domain/
+    cp -r $theme_path/$active_theme $backup_dir/$domain/$domain-$timestamp
     
     # Backup the media uploads
-    cp -r /var/www/$domain/wp-content/uploads $backup_dir/$domain/
+    cp -r /var/www/$domain/wp-content/uploads $backup_dir/$domain/$domain-$timestamp/
     
 done
 ```

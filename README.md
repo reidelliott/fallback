@@ -52,6 +52,9 @@ domains=`ls /var/www`
 log_file=$backup_dir/backup.log
 touch $log_file
 
+# Set an empty variable for results
+results=""
+
 # Loop through each domain and create a backup of its database and theme and media uploads
 for domain in $domains
 do
@@ -64,18 +67,24 @@ do
     timestamp=$(date +%Y-%m-%d-%H-%M)
     
     # Create a backup of the database
-    mysqldump -u $db_user -p$db_pass $db_name > $backup_dir/$domain/$domain-$timestamp.sql  || { echo "$(date +%Y-%m-%d-%H-%M) : Failed to backup $domain $db_name" >> $log_file; continue; }
+    mysqldump -u $db_user -p$db_pass $db_name > $backup_dir/$domain/$domain-$timestamp.sql  || { echo "$(date +%Y-%m-%d-%H-%M) : Failed to backup $domain $db_name" >> $log_file; results+="$(date +%Y-%m-%d-%H-%M) : Failed to backup $domain $db_name\n"; continue; }
     echo "$(date +%Y-%m-%d-%H-%M) : Successfully backed up $domain $db_name" >> $log_file
+    results+="$(date +%Y-%m-%d-%H-%M) : Successfully backed up $domain $db_name\n"
     
     # Backup the active theme
     theme_path=`wp theme path --path=/var/www/$domain`
     active_theme=`wp theme get --field=stylesheet --path=$theme_path`
-    cp -r $theme_path/$active_theme $backup_dir/$domain/$domain-$timestamp  || { echo "$(date +%Y-%m-%d-%H-%M) : Failed to backup $domain $active_theme" >> $log_file; continue; }
+    cp -r $theme_path/$active_theme $backup_dir/$domain/$domain-$timestamp  || { echo "$(date +%Y-%m-%d-%H-%M) : Failed to backup $domain $active_theme" >> $log_file; results+="$(date +%Y-%m-%d-%H-%M) : Failed to backup $domain $active_theme\n";continue; }
     echo "$(date +%Y-%m-%d-%H-%M) : Successfully backed up $domain $active_theme" >> $log_file
+    results+="$(date +%Y-%m-%d-%H-%M) : Successfully backed up $domain $active_theme\n"
     
     # Backup the media uploads
-    cp -r /var/www/$domain/wp-content/uploads $backup_dir/$domain/$domain-$timestamp/  || { echo "$(date +%Y-%m-%d-%H-%M) : Failed to backup $domain media uploads" >> $log_file; continue; }
+    cp -r /var/www/$domain/wp-content/uploads $backup_dir/$domain/$domain-$timestamp/  || { echo "$(date +%Y-%m-%d-%H-%M) : Failed to backup $domain media uploads" >> $log_file; results+="$(date +%Y-%m-%d-%H-%M) : Failed to backup $domain media uploads\n"; continue; }
     echo "$(date +%Y-%m-%d-%H-%M) : Successfully backed up $domain media uploads" >> $log_file
-    
+    results+="$(date +%Y-%m-%d-%H-%M) : Successfully backed up $domain media uploads\n"
+
 done
+
+# Send the email with the summary of the results
+echo -e $results | mail -s "Backup report for all domains on \$server_code" $recipient
 ```

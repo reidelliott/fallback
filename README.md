@@ -11,6 +11,9 @@ curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.pha
 chmod +x wp-cli.phar
 sudo mv wp-cli.phar /usr/local/bin/wp
 ```
+## TODO
+* Add check to remove backups older than 30 days.
+* Integrate with Dropbox to offload backups from server.
 
 ## Scheduling
 There might be various ways to schedule these backups, either in plesk or directly using contjob.

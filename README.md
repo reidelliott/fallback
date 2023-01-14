@@ -11,6 +11,19 @@ curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.pha
 chmod +x wp-cli.phar
 sudo mv wp-cli.phar /usr/local/bin/wp
 ```
+* Allow sudo for all users on the backup script file only 
+```sh
+# Edit sudoer file will root user
+sudo visudo
+
+# Add the following line to the end of the file
+* ALL=(root) NOPASSWD: /backup.sh
+```
+* Install `gdrive` command line tool
+  * install the `gdrive` command line tool by following the instructions on this page: https://github.com/gdrive-org/gdrive
+  * Once `gdrive` is installed, you will need to authenticate it with your Google account by running the command `gdrive about`. This will open a browser window where you can sign in to your Google account and give `gdrive` access to your Google Drive.
+
+find backup \( -type d -exec chmod u+rwx,g+rwx,o+rx {} \; -o -type f -exec chmod u+rw,g+rw,o+r {} \; \)
 ## TODO
 * Add check to remove backups older than 30 days.
 * Integrate with Google Drive to offload backups from server.

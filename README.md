@@ -47,3 +47,31 @@ The file `backup.sh` here is your backup script sample.You can use it to take da
 
 This script should work on Ubuntu as well as on CentOS, as long as the necessary dependencies are installed on the server. The script uses standard Linux commands such as `ls`, `grep`, `awk`, `mysqldump`, `wp`, `cp`, and `tar` to perform the backups. These commands are available on both Ubuntu and CentOS. However, the package names for the dependencies could be different between Ubuntu and CentOS. For example, wp-cli package is available in Ubuntu's default package manager apt, whereas on CentOS you will have to install it via other means such as downloading with the instructions above. In addition, the path to the webroot directory and the location of the WordPress configuration file might be different on Ubuntu compared to CentOS.  Make sure to verify the correct paths and dependencies before running the script on an Ubuntu server.
 
+## GDrive Integration
+First, you will need to install the `gdrive` command line tool by following the instructions on this page: https://github.com/gdrive-org/gdrive
+
+Once `gdrive` is installed, you will need to authenticate it with your Google account by running the command gdrive about. This will open a browser window where you can sign in to your Google account and give gdrive access to your Google Drive.
+
+Next, you can use the gdrive upload command to upload the tarball files to Google Drive. For example, you can add the following command to your script after the tarball files have been created:
+
+```sh
+gdrive upload --parent <folder_id> $backup_dir/$domain-$timestamp.tar.gz
+```
+
+## Slack integration
+```sh
+# Set the Slack Webhook URL
+SLACK_WEBHOOK_URL="https://hooks.slack.com/services/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"
+
+# Set the Slack channel to post to
+SLACK_CHANNEL="#backup-results"
+
+# Set the Slack username to post as
+SLACK_USERNAME="Backup Script"
+
+# Set the Slack icon to use
+SLACK_ICON=":floppy_disk:"
+
+# Post the results to Slack
+curl -X POST -H 'Content-type: application/json' --data "{\"channel\": \"$SLACK_CHANNEL\", \"username\": \"$SLACK_USERNAME\", \"icon_emoji\": \"$SLACK_ICON\", \"text\": \"$results\"}" $SLACK_WEBHOOK_URL
+```

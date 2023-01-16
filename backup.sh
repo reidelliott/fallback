@@ -8,7 +8,7 @@ backup_dir="/backup"
 
 # Check if $backup_dir exists, create it if not
 if [ ! -d $backup_dir ]; then
-    sudo mkdir $backup_dir
+    sudo mkdir -p $backup_dir/$domain || { echo "Error: Failed to create backup directory." ; exit 1; }
     echo "Directory $backup_dir created."
 else
     echo "Directory $backup_dir already exists. Cool."

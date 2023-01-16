@@ -20,10 +20,8 @@ sudo visudo
 * ALL=(root) NOPASSWD: /backup.sh
 ```
 * Install `gdrive` command line tool
-  * install the `gdrive` command line tool by following the instructions on this page: https://github.com/gdrive-org/gdrive
-  * Once `gdrive` is installed, you will need to authenticate it with your Google account by running the command `gdrive about`. This will open a browser window where you can sign in to your Google account and give `gdrive` access to your Google Drive.
+* mysql is configured to allow remote connections.
 
-find backup \( -type d -exec chmod u+rwx,g+rwx,o+rx {} \; -o -type f -exec chmod u+rw,g+rw,o+r {} \; \)
 ## TODO
 * Add check to remove backups older than 30 days.
 * Integrate with Google Drive to offload backups from server.
